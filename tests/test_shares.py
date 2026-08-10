@@ -1,8 +1,10 @@
 import io
 import re
+from datetime import timedelta
 from urllib.parse import urlparse
 
-from app.models import ShareAccessLog, ShareLink
+from app.extensions import db
+from app.models import DriveFile, ShareAccessLog, ShareLink
 
 
 def create_file(client):
@@ -71,3 +73,14 @@ def test_plain_token_is_not_stored(logged_client, app):
         link = ShareLink.query.one()
         assert token != link.token_hash
         assert len(link.token_hash) == 64
+
+
+def test_share_expiration_cannot_exceed_file_retention(logged_client, app):
+    with app.app_context():
+        file_id = create_file(logged_client)
+    logged_client.post(f"/drive/files/{file_id}/share", data={"days": "365"})
+
+    with app.app_context():
+        item = db.session.get(DriveFile, file_id)
+        link = ShareLink.query.one()
+        assert link.expires_at == item.created_at + timedelta(days=app.config["FILE_RETENTION_DAYS"])

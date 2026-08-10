@@ -171,6 +171,7 @@ def browse(folder_id):
         unit=folder.unit if folder else None,
         used_bytes=storage_used_bytes(folder.unit_id) if folder else None,
         can_manage_content=folder is not None,
+        retention_days=current_app.config["FILE_RETENTION_DAYS"],
     )
 
 
@@ -377,9 +378,8 @@ def download_file(file_id):
 def create_share(file_id):
     item = active_file(file_id)
     token = secrets.token_urlsafe(32)
-    days = request.form.get("days", type=int)
     max_downloads = request.form.get("max_downloads", type=int)
-    expires_at = utcnow() + timedelta(days=days) if days and days > 0 else None
+    expires_at = item.created_at + timedelta(days=current_app.config["FILE_RETENTION_DAYS"])
     link = ShareLink(
         token_hash=ShareLink.digest(token),
         file_id=item.id,

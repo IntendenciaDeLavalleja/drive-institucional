@@ -49,7 +49,6 @@ class Config:
     TWO_FACTOR_MAX_ATTEMPTS = int(os.getenv("TWO_FACTOR_MAX_ATTEMPTS", "5"))
     FILE_RETENTION_DAYS = int(os.getenv("FILE_RETENTION_DAYS", "15"))
     CAPTCHA_ENABLED = env_bool("CAPTCHA_ENABLED", True)
-    SHARE_DEFAULT_DAYS = int(os.getenv("SHARE_DEFAULT_DAYS", "7"))
     APP_NAME = os.getenv("APP_NAME", "Drive Institucional de Lavalleja")
     PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:5000").rstrip("/")
     TRUSTED_PROXY_COUNT = int(os.getenv("TRUSTED_PROXY_COUNT", "1"))
