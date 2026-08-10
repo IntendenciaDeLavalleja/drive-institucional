@@ -98,18 +98,7 @@
             </details>
           </td>
         </tr>
-        <dialog id="share-{{ file.id }}" class="share-dialog" data-modal-version="spacious" aria-labelledby="share-title-{{ file.id }}">
-          <form method="post" action="{{ url_for('drive.create_share', file_id=file.id) }}" class="dialog-card share-dialog-card">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="dialog-heading"><div><p class="eyebrow">Compartir archivo</p><h2 id="share-title-{{ file.id }}" class="share-file-title" title="{{ file.display_name }}">{{ file.display_name }}</h2></div><button type="button" class="dialog-close" aria-label="Cerrar">×</button></div>
-            <label>Destino o referencia (opcional)<input name="label" placeholder="Tribunal de Cuentas"></label>
-            <div class="share-retention"><strong>Vencimiento fijo: {{ retention_days }} días desde la carga</strong><span>El enlace se desactiva cuando el archivo se elimina automáticamente.</span></div>
-            <label>Máximo de descargas (opcional)<input type="number" min="1" name="max_downloads" placeholder="Sin límite"></label>
-            <label>Contraseña adicional (opcional)<input type="password" name="password" minlength="8" autocomplete="new-password"></label>
-            <p class="muted small share-note">El enlace solo se mostrará una vez y puede revocarse antes de su vencimiento.</p>
-            <div class="share-dialog-footer"><button class="button primary" type="submit">Generar enlace seguro</button></div>
-          </form>
-        </dialog>
+        {% include "components/share_modal.html" %}
       {% endfor %}
       {% if not folders and not files %}
         <tr><td colspan="6"><div class="empty"><span>↥</span><h3>Esta carpeta está vacía</h3><p>Subí archivos o creá una carpeta para comenzar.</p></div></td></tr>

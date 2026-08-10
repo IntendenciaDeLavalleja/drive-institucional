@@ -1,0 +1,197 @@
+<dialog id="share-{{ file.id }}" class="idl-share-modal" aria-labelledby="share-title-{{ file.id }}">
+  <style>
+    /* Estilos encapsulados del componente modal de compartir */
+    dialog.idl-share-modal {
+      width: min(720px, calc(100vw - 32px)) !important;
+      max-width: 720px !important;
+      max-height: calc(100dvh - 32px) !important;
+      padding: 0 !important;
+      border: 1px solid #d9e4f0 !important;
+      border-radius: 22px !important;
+      background: #ffffff !important;
+      box-shadow: 0 28px 80px rgba(8, 42, 82, 0.28) !important;
+      overflow: hidden !important;
+    }
+    dialog.idl-share-modal::backdrop {
+      background: rgba(16, 33, 61, 0.56) !important;
+      backdrop-filter: blur(3px) !important;
+    }
+    .idl-share-card {
+      box-sizing: border-box !important;
+      padding: 40px 44px 36px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 22px !important;
+      width: 100% !important;
+      max-height: calc(100dvh - 32px) !important;
+      margin: 0 !important;
+      overflow-y: auto !important;
+      background: #ffffff !important;
+    }
+    .idl-share-card .dialog-heading {
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: space-between !important;
+      gap: 24px !important;
+      margin: 0 !important;
+      padding-bottom: 22px !important;
+      border-bottom: 1px solid #e5ebf3 !important;
+    }
+    .idl-share-card .dialog-heading > div {
+      min-width: 0 !important;
+    }
+    .idl-share-title {
+      font-size: clamp(20px, 2.3vw, 26px) !important;
+      line-height: 1.25 !important;
+      color: #082a52 !important;
+      margin: 6px 0 0 !important;
+      letter-spacing: -0.02em !important;
+      overflow-wrap: anywhere !important;
+      max-width: 560px !important;
+    }
+    .idl-share-card .dialog-close {
+      flex: 0 0 34px !important;
+      width: 34px !important;
+      height: 34px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 10px !important;
+      background: #eef3f8 !important;
+      color: #40516a !important;
+      font-size: 24px !important;
+      line-height: 1 !important;
+      cursor: pointer !important;
+    }
+    .idl-share-card .dialog-close:hover {
+      background: #dce8f4 !important;
+    }
+    .idl-share-card label {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: #273754 !important;
+      margin: 0 !important;
+    }
+    .idl-share-card input {
+      width: 100% !important;
+      min-height: 48px !important;
+      padding: 12px 14px !important;
+      border: 1px solid #c9d6e6 !important;
+      border-radius: 10px !important;
+      background: #ffffff !important;
+      font-size: 14px !important;
+      color: #172033 !important;
+      outline: none !important;
+      box-sizing: border-box !important;
+    }
+    .idl-share-card input:focus {
+      border-color: #0c63ce !important;
+      box-shadow: 0 0 0 3px rgba(12, 99, 206, 0.12) !important;
+    }
+    .idl-share-retention {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+      padding: 18px 20px !important;
+      border: 1px solid #b9d6fb !important;
+      border-radius: 14px !important;
+      background: #edf6ff !important;
+      color: #164d85 !important;
+      margin: 0 !important;
+      line-height: 1.45 !important;
+    }
+    .idl-share-retention strong {
+      font-size: 14px !important;
+      color: #164d85 !important;
+    }
+    .idl-share-retention span {
+      font-size: 13px !important;
+      color: #42698f !important;
+    }
+    .idl-share-note {
+      margin: 0 !important;
+      font-size: 12px !important;
+      color: #657187 !important;
+      line-height: 1.5 !important;
+    }
+    .idl-share-footer {
+      display: flex !important;
+      justify-content: flex-end !important;
+      padding-top: 22px !important;
+      border-top: 1px solid #e5ebf3 !important;
+      margin: 0 !important;
+    }
+    .idl-share-footer .button.primary {
+      min-width: 230px !important;
+      min-height: 48px !important;
+      padding: 12px 24px !important;
+      font-size: 14px !important;
+      border-radius: 10px !important;
+    }
+    @media (max-width: 600px) {
+      dialog.idl-share-modal {
+        width: calc(100vw - 20px) !important;
+        max-height: calc(100dvh - 20px) !important;
+        border-radius: 18px !important;
+      }
+      .idl-share-card {
+        padding: 28px 20px 22px !important;
+        gap: 18px !important;
+        max-height: calc(100dvh - 20px) !important;
+      }
+      .idl-share-card .dialog-heading {
+        gap: 14px !important;
+        padding-bottom: 16px !important;
+      }
+      .idl-share-title {
+        font-size: 19px !important;
+      }
+      .idl-share-footer {
+        padding-top: 16px !important;
+      }
+      .idl-share-footer .button.primary {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+  </style>
+
+  <form method="post" action="{{ url_for('drive.create_share', file_id=file.id) }}" class="idl-share-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">Compartir archivo</p>
+        <h2 id="share-title-{{ file.id }}" class="idl-share-title" title="{{ file.display_name }}">{{ file.display_name }}</h2>
+      </div>
+      <button type="button" class="dialog-close" aria-label="Cerrar">×</button>
+    </div>
+
+    <label>
+      Destino o referencia (opcional)
+      <input name="label" placeholder="Tribunal de Cuentas">
+    </label>
+
+    <div class="idl-share-retention">
+      <strong>Vencimiento fijo: {{ retention_days }} días desde la carga</strong>
+      <span>El enlace se desactiva cuando el archivo se elimina automáticamente.</span>
+    </div>
+
+    <label>
+      Máximo de descargas (opcional)
+      <input type="number" min="1" name="max_downloads" placeholder="Sin límite">
+    </label>
+
+    <label>
+      Contraseña adicional (opcional)
+      <input type="password" name="password" minlength="8" autocomplete="new-password">
+    </label>
+
+    <p class="idl-share-note">El enlace solo se mostrará una vez y puede revocarse antes de su vencimiento.</p>
+
+    <div class="idl-share-footer">
+      <button class="button primary" type="submit">Generar enlace seguro</button>
+    </div>
+  </form>
+</dialog>
