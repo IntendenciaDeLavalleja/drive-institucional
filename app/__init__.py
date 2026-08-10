@@ -29,6 +29,10 @@ def create_app(config_name=None, overrides=None):
     if not app.config.get("SQLALCHEMY_DATABASE_URI"):
         raise RuntimeError("DATABASE_URL es obligatoria")
 
+    @app.context_processor
+    def public_asset_context():
+        return {"public_asset_origin": app.config["PUBLIC_BASE_URL"]}
+
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=app.config["TRUSTED_PROXY_COUNT"],
