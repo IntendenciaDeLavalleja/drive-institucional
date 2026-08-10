@@ -98,7 +98,6 @@
             </details>
           </td>
         </tr>
-        {% include "components/share_modal.html" %}
       {% endfor %}
       {% if not folders and not files %}
         <tr><td colspan="6"><div class="empty"><span>↥</span><h3>Esta carpeta está vacía</h3><p>Subí archivos o creá una carpeta para comenzar.</p></div></td></tr>
@@ -107,6 +106,10 @@
     </table>
   </div>
 </section>
+
+{% for file in files %}
+  {% include "components/share_modal.html" %}
+{% endfor %}
 
 <dialog id="new-folder">
   <form method="post" action="{{ url_for('drive.create_folder') }}" class="dialog-card">

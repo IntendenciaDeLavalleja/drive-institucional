@@ -84,3 +84,15 @@ def test_share_expiration_cannot_exceed_file_retention(logged_client, app):
         item = db.session.get(DriveFile, file_id)
         link = ShareLink.query.one()
         assert link.expires_at == item.created_at + timedelta(days=app.config["FILE_RETENTION_DAYS"])
+
+
+def test_share_modal_is_outside_table_and_has_a_matching_trigger(logged_client, app):
+    with app.app_context():
+        file_id = create_file(logged_client)
+
+    response = logged_client.get("/drive/")
+
+    trigger = f'data-dialog-open="share-{file_id}"'
+    dialog = f'<dialog id="share-{file_id}"'
+    assert trigger in response.text
+    assert response.text.index("</table>") < response.text.index(dialog)
