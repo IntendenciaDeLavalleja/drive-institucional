@@ -1,9 +1,13 @@
 import click
+from datetime import timedelta
+
+from flask import current_app
 from flask.cli import with_appcontext
 from flask_migrate import upgrade
 
 from .extensions import db
-from .models import Unit, User
+from .audit import audit
+from .models import DriveFile, Unit, User, utcnow
 from .storage import storage
 
 
@@ -59,3 +63,58 @@ def create_admin(username, email, password, is_superuser, unit_name):
 def init_storage():
     storage._require_client()
     click.echo(f"Bucket privado '{storage.bucket}' listo.")
+
+
+@click.command("prune-expired-files")
+@with_appcontext
+def prune_expired_files():
+    """Elimina objetos y registros que superaron su vida útil."""
+    retention_days = current_app.config["FILE_RETENTION_DAYS"]
+    cutoff = utcnow() - timedelta(days=retention_days)
+    dialect = db.engine.dialect.name
+    lock_acquired = True
+    if dialect in {"mariadb", "mysql"}:
+        lock_acquired = bool(
+            db.session.execute(db.text("SELECT GET_LOCK('drive_expired_file_cleanup', 0)")).scalar()
+        )
+    if not lock_acquired:
+        click.echo("La limpieza ya se está ejecutando en otra instancia.")
+        return
+
+    deleted = 0
+    failed = 0
+    try:
+        expired_ids = [
+            file_id
+            for (file_id,) in (
+                DriveFile.query.with_entities(DriveFile.id)
+                .filter(DriveFile.deleted_at.is_(None), DriveFile.created_at <= cutoff)
+                .order_by(DriveFile.created_at)
+                .all()
+            )
+        ]
+        for file_id in expired_ids:
+            item = DriveFile.query.filter_by(id=file_id, deleted_at=None).with_for_update().first()
+            if not item:
+                continue
+            try:
+                storage.delete(item.object_key)
+                item.deleted_at = utcnow()
+                audit(
+                    "FILE_EXPIRE_DELETE",
+                    f"{item.display_name}; vencimiento de {retention_days} días",
+                    "file",
+                    item.id,
+                )
+                db.session.commit()
+                deleted += 1
+            except Exception:
+                db.session.rollback()
+                current_app.logger.exception("No se pudo eliminar el archivo vencido %s", file_id)
+                failed += 1
+    finally:
+        if dialect in {"mariadb", "mysql"}:
+            db.session.execute(db.text("SELECT RELEASE_LOCK('drive_expired_file_cleanup')"))
+            db.session.commit()
+
+    click.echo(f"Limpieza completada: {deleted} eliminado(s), {failed} con error.")

@@ -57,7 +57,17 @@ flask create-admin nebyx usuario@lavalleja.uy "Contraseña-segura-123" true
 El último argumento es `true` para superadmin o `false` para admin.
 Un admin requiere como quinto argumento el nombre exacto de una unidad ya creada.
 
-## 5. Archivos grandes
+## 5. Retención de archivos
+
+Los archivos se eliminan automáticamente de MinIO y de la aplicación a los 15 días de cargados. El contenedor ejecuta `flask prune-expired-files` al iniciar y cada 24 horas. Para una ejecución manual o una tarea programada de Coolify:
+
+```bash
+flask prune-expired-files
+```
+
+No configurar más de una réplica de la aplicación sin mantener MariaDB disponible: el comando usa un bloqueo de base de datos para que sólo una instancia procese vencimientos.
+
+## 6. Archivos grandes
 
 La aplicación acepta hasta 5 GiB por defecto (`MAX_UPLOAD_BYTES`). Gunicorn tiene un timeout de 900 segundos. Si se usa un proxy adicional, verificar:
 
@@ -69,7 +79,7 @@ El servidor web de Flask usa el archivo temporal administrado por Werkzeug y Min
 
 Cloudflare y otros proxies pueden imponer límites por plan; para archivos mayores se recomienda que el subdominio no atraviese un proxy con límite inferior.
 
-## 6. Backups
+## 7. Backups
 
 Respaldar juntos:
 
@@ -79,10 +89,11 @@ Respaldar juntos:
 
 La base sin el bucket conserva auditoría y nombres, pero no el contenido. El bucket sin la base no conserva carpetas, propietarios ni enlaces.
 
-## 7. Verificación
+## 8. Verificación
 
 1. `/health` responde `{"status":"ok"}` y verifica MariaDB y MinIO.
 2. El correo 2FA llega y el código solo funciona una vez.
 3. Se puede subir y descargar un archivo de prueba.
 4. Un enlace con contraseña funciona y luego puede revocarse.
 5. Los eventos aparecen en Auditoría para el superadministrador.
+6. El panel Vencimientos muestra los archivos activos y `flask prune-expired-files` elimina los que superaron 15 días.

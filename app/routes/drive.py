@@ -1,4 +1,5 @@
 import secrets
+from math import ceil
 from datetime import datetime, timedelta
 
 from flask import (
@@ -430,6 +431,22 @@ def audit_logs():
         else []
     )
     return render_template("audit.html", pagination=pagination, share_logs=share_logs, q=q)
+
+
+@bp.get("/expiration")
+@login_required
+@superadmin_required
+def expiration_panel():
+    now = utcnow()
+    retention_days = current_app.config["FILE_RETENTION_DAYS"]
+    files = []
+    for item in DriveFile.query.filter_by(deleted_at=None).order_by(DriveFile.created_at.asc()).all():
+        expires_at = item.created_at + timedelta(days=retention_days)
+        seconds_left = (expires_at - now).total_seconds()
+        days_left = max(0, ceil(seconds_left / 86400))
+        color = "red" if seconds_left <= 2 * 86400 else "yellow" if seconds_left <= 7 * 86400 else "green"
+        files.append({"item": item, "expires_at": expires_at, "days_left": days_left, "color": color})
+    return render_template("expiration.html", files=files, retention_days=retention_days)
 
 
 def redirect_to_folder(folder_id):

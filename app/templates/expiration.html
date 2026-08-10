@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Vencimientos · Drive Institucional{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Superadministración</p><h1>Vencimiento de archivos</h1><p class="muted">Los archivos se eliminan automáticamente {{ retention_days }} días después de su carga.</p></div></div>
+<section class="file-panel"><div class="table-wrap"><table>
+  <thead><tr><th>Archivo</th><th>Unidad</th><th>Subido por</th><th>Fecha de carga</th><th>Vence</th><th>Estado</th></tr></thead>
+  <tbody>{% for file in files %}
+    <tr><td><strong>{{ file.item.display_name }}</strong></td><td>{{ file.item.unit.name }}</td><td>{{ file.item.uploaded_by.username }}</td><td>{{ file.item.created_at|datetime_local }}</td><td>{{ file.expires_at|datetime_local }}</td><td><span class="badge expiry-{{ file.color }}">{% if file.color == 'green' %}{{ file.days_left }} día(s) restante(s){% else %}Vence en {{ file.days_left }} día(s){% endif %}</span></td></tr>
+  {% else %}<tr><td colspan="6"><div class="empty"><h3>No hay archivos activos</h3><p>Los archivos cargados aparecerán aquí ordenados por fecha.</p></div></td></tr>{% endfor %}</tbody>
+</table></div></section>
+{% endblock %}

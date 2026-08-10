@@ -47,6 +47,7 @@ class Config:
     REMEMBER_COOKIE_SECURE = SESSION_COOKIE_SECURE
     TWO_FACTOR_TTL_MINUTES = int(os.getenv("TWO_FACTOR_TTL_MINUTES", "10"))
     TWO_FACTOR_MAX_ATTEMPTS = int(os.getenv("TWO_FACTOR_MAX_ATTEMPTS", "5"))
+    FILE_RETENTION_DAYS = int(os.getenv("FILE_RETENTION_DAYS", "15"))
     CAPTCHA_ENABLED = env_bool("CAPTCHA_ENABLED", True)
     SHARE_DEFAULT_DAYS = int(os.getenv("SHARE_DEFAULT_DAYS", "7"))
     APP_NAME = os.getenv("APP_NAME", "Drive Institucional de Lavalleja")

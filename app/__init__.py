@@ -73,10 +73,11 @@ def create_app(config_name=None, overrides=None):
 
     register_error_handlers(app)
 
-    from .commands import create_admin, init_storage
+    from .commands import create_admin, init_storage, prune_expired_files
 
     app.cli.add_command(create_admin)
     app.cli.add_command(init_storage)
+    app.cli.add_command(prune_expired_files)
 
     @app.get("/health")
     def health():

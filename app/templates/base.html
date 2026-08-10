@@ -19,9 +19,10 @@
     <nav>
       <a href="{{ url_for('drive.index') }}">Archivos</a>
        {% if current_user.is_superadmin %}
-       <a href="{{ url_for('units.index') }}">Unidades</a>
-       <a href="{{ url_for('users.index') }}">Usuarios</a>
-      <a href="{{ url_for('drive.audit_logs') }}">Auditoría</a>
+        <a href="{{ url_for('units.index') }}">Unidades</a>
+        <a href="{{ url_for('users.index') }}">Usuarios</a>
+       <a href="{{ url_for('drive.expiration_panel') }}">Vencimientos</a>
+       <a href="{{ url_for('drive.audit_logs') }}">Auditoría</a>
       {% endif %}
       <span class="user-chip">{{ current_user.username }} · {{ 'Superadmin' if current_user.is_superadmin else 'Admin' }}</span>
       <form method="post" action="{{ url_for('auth.logout') }}">

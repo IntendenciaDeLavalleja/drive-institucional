@@ -5,6 +5,7 @@ from app.models import Unit, User
 def test_admin_cannot_manage_users(logged_client):
     assert logged_client.get("/admin/users/").status_code == 403
     assert logged_client.get("/admin/units/").status_code == 403
+    assert logged_client.get("/drive/expiration").status_code == 403
     assert logged_client.get("/drive/audit").status_code == 403
 
 
