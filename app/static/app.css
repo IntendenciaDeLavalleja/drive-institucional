@@ -24,3 +24,10 @@
 .share-dialog[data-modal-version="spacious"] .share-dialog-footer{padding-top:22px}
 .share-dialog[data-modal-version="spacious"] .share-dialog-footer .button{min-width:230px;min-height:48px}
 @media(max-width:600px){.share-dialog[data-modal-version="spacious"]{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:18px}.share-dialog[data-modal-version="spacious"]>.share-dialog-card{max-height:calc(100dvh - 20px);padding:28px 20px 22px!important;gap:18px}.share-dialog[data-modal-version="spacious"] .dialog-heading{gap:14px;padding-bottom:17px}.share-dialog[data-modal-version="spacious"] .share-file-title{font-size:20px}.share-dialog[data-modal-version="spacious"] .share-dialog-footer{padding-top:18px}.share-dialog[data-modal-version="spacious"] .share-dialog-footer .button{width:100%;min-width:0}}
+
+/* Final overrides keep the share form padded even when generic dialog styles change. */
+.share-dialog[data-modal-version="spacious"] > form.share-dialog-card{box-sizing:border-box!important;padding:42px 48px 38px!important;display:grid!important;gap:24px!important;width:100%!important;min-width:0;overflow-y:auto}
+.share-dialog[data-modal-version="spacious"] > form.share-dialog-card > label{margin:0!important}
+.share-dialog[data-modal-version="spacious"] > form.share-dialog-card > .share-retention{margin:0!important}
+.share-dialog[data-modal-version="spacious"] > form.share-dialog-card > .share-dialog-footer{margin:0!important}
+@media(max-width:600px){.share-dialog[data-modal-version="spacious"] > form.share-dialog-card{padding:30px 22px 24px!important;gap:20px!important}}
