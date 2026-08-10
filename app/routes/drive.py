@@ -21,7 +21,7 @@ from werkzeug.utils import secure_filename
 from ..audit import audit
 from ..extensions import db, limiter
 from ..models import AuditLog, DriveFile, Folder, ShareAccessLog, ShareLink, Unit, utcnow
-from ..security import safe_filename, superadmin_required
+from ..security import file_content_type, safe_filename, superadmin_required
 from ..storage import StorageError, storage
 
 bp = Blueprint("drive", __name__, url_prefix="/drive")
@@ -305,7 +305,7 @@ def upload():
                 unit_id=unit.id,
                 display_name=display_name,
                 object_key=stored.object_key,
-                content_type=upload_item.mimetype or "application/octet-stream",
+                content_type=file_content_type(display_name, upload_item.mimetype),
                 size_bytes=stored.size_bytes,
                 etag=stored.etag,
                 sha256=stored.sha256,

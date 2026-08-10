@@ -17,7 +17,7 @@
       <button class="button primary wide" type="submit">Ver archivo</button>
     </form>
   {% else %}
-    <div class="file-hero"><span>PDF</span><div><strong>{{ link.file.display_name }}</strong><small>SHA-256: {{ link.file.sha256[:20] }}…</small></div></div>
+    <div class="file-hero"><span class="file-type file-type-{{ file_type|lower }}">{{ file_type }}</span><div><strong>{{ link.file.display_name }}</strong><small>SHA-256: {{ link.file.sha256[:20] }}…</small></div></div>
     <a class="button primary wide" href="{{ url_for('share.download', token=request.view_args.token) }}">Descargar archivo</a>
     {% if link.expires_at %}<p class="security-note">Disponible hasta {{ link.expires_at|datetime_local }}.</p>{% endif %}
   {% endif %}

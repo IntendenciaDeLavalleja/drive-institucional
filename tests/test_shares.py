@@ -96,3 +96,21 @@ def test_share_modal_is_outside_table_and_has_a_matching_trigger(logged_client, 
     dialog = f'<dialog id="share-{file_id}"'
     assert trigger in response.text
     assert response.text.index("</table>") < response.text.index(dialog)
+
+
+def test_docx_type_overrides_an_incorrect_browser_mime_type(logged_client, app):
+    logged_client.post(
+        "/drive/upload",
+        data={"files": (io.BytesIO(b"documento"), "informe.docx", "application/pdf")},
+        content_type="multipart/form-data",
+    )
+    with app.app_context():
+        item = DriveFile.query.one()
+        file_id = item.id
+        assert item.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+    response = logged_client.post(f"/drive/files/{file_id}/share")
+    path = urlparse(extract_url(response.text)).path
+    public_response = app.test_client().get(path)
+
+    assert '<span class="file-type file-type-docx">DOCX</span>' in public_response.text

@@ -2,6 +2,7 @@ from flask import Blueprint, abort, render_template, request, session
 
 from ..extensions import db, limiter
 from ..models import ShareAccessLog, ShareLink, utcnow
+from ..security import file_type_label
 from .drive import stream_object
 
 bp = Blueprint("share", __name__, url_prefix="/s")
@@ -48,7 +49,12 @@ def open_share(token):
     log_access(link, "VIEW", "SUCCESS")
     link.last_accessed_at = utcnow()
     db.session.commit()
-    return render_template("public_share.html", link=link, password_required=False)
+    return render_template(
+        "public_share.html",
+        link=link,
+        password_required=False,
+        file_type=file_type_label(link.file.display_name, link.file.content_type),
+    )
 
 
 @bp.get("/<token>/download")
