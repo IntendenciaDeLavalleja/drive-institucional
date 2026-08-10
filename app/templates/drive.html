@@ -17,6 +17,11 @@
   </div>{% endif %}
 </div>
 
+<aside class="retention-alert" role="note">
+  <strong>Uso institucional y transitorio.</strong>
+  Los archivos se eliminan automáticamente luego de 15 días. Este Drive es exclusivamente para compartir documentación institucional dentro de la Intendencia o con organismos externos; no puede utilizarse para fines privados.
+</aside>
+
 <section class="toolbar">
   <form method="get" class="search">
     <input type="search" name="q" value="{{ q }}" placeholder="Buscar en esta carpeta…">
@@ -25,7 +30,7 @@
   <span class="muted">{{ folders|length }} carpeta(s) · {{ files|length }} archivo(s){% if unit %} · {{ used_bytes|filesize }} de {{ unit.quota_bytes|filesize }}{% endif %}</span>
 </section>
 
-<section class="file-panel">
+<section class="file-panel drive-file-panel">
   <div class="table-wrap">
     <table>
       <thead><tr><th>Nombre</th><th>Propietario</th><th>Modificado</th><th>Tamaño</th><th>Compartido</th><th></th></tr></thead>
