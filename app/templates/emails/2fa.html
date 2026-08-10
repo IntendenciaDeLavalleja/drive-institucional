@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Código de acceso</title></head>
+<body style="margin:0;background:#f1f5fb;color:#10213d;font-family:Arial,sans-serif">
+  <div style="max-width:560px;margin:32px auto;background:#fff;border:1px solid #d8e1ee;border-radius:12px;overflow:hidden">
+    <div style="background:#07518b;color:#fff;padding:24px;text-align:center">
+      <h1 style="margin:0;font-size:22px">Drive Institucional</h1>
+      <p style="margin:8px 0 0">Verificación de identidad</p>
+    </div>
+    <div style="padding:32px;line-height:1.6">
+      <p>Se solicitó un inicio de sesión en el Drive Institucional.</p>
+      <p>Tu código de segundo factor es:</p>
+      <p style="margin:24px 0;text-align:center;font-size:32px;font-weight:bold;letter-spacing:8px;color:#1269cc">{{ code }}</p>
+      <p>El código vence en <strong>{{ ttl_minutes }} minutos</strong> y sólo puede utilizarse una vez.</p>
+      <p style="padding:12px;background:#fff8e5;border:1px solid #f2d58a;border-radius:6px;font-size:13px">Si no reconocés este intento, ignorá este correo y contactá al administrador.</p>
+    </div>
+    <div style="padding:16px;text-align:center;border-top:1px solid #e8edf4;color:#718096;font-size:12px">Mensaje automático. No respondas este correo.</div>
+  </div>
+</body>
+</html>

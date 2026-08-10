@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión · Drive Institucional{% endblock %}
+{% block main_class %}auth-shell{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <img src="{{ url_for('static', filename='logo.webp') }}" alt="Intendencia de Lavalleja" class="auth-logo">
+  <p class="eyebrow">Gobierno de Lavalleja</p>
+  <h1>Drive Institucional</h1>
+  <p class="muted">Acceso exclusivo para personal autorizado.</p>
+  <form method="post" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if request.args.get('next') %}<input type="hidden" name="next" value="{{ request.args.get('next') }}">{% endif %}
+    <label>Correo institucional
+      <input type="email" name="email" required autocomplete="username" autofocus>
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    {% if config.get('CAPTCHA_ENABLED') %}
+    <label>Verificación de seguridad: {{ captcha_question }}
+      <input type="number" name="captcha" required inputmode="numeric" autocomplete="off" placeholder="Resultado">
+    </label>
+    {% endif %}
+    <button class="button primary wide" type="submit">Continuar</button>
+  </form>
+  <p class="security-note">El segundo factor se enviará a tu correo.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,7 @@
+Drive Institucional
+
+Se solicitó un inicio de sesión en el Drive Institucional.
+Tu código de segundo factor es: {{ code }}
+
+El código vence en {{ ttl_minutes }} minutos y sólo puede utilizarse una vez.
+Si no reconocés este intento, contactá al administrador.

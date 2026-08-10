@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Repositorio institucional privado{% if unit %} · {{ unit.name }}{% endif %}</p>
+    <h1>{{ current_folder.name if current_folder else 'Todos los archivos' }}</h1>
+    <div class="breadcrumbs">
+      <a href="{{ url_for('drive.index') }}">Inicio</a>
+      {% for crumb in breadcrumbs %}
+        <span>›</span><a href="{{ url_for('drive.browse', folder_id=crumb.id) }}">{{ crumb.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% if can_manage_content %}<div class="heading-actions">
+    <button class="button secondary" data-dialog-open="new-folder">Nueva carpeta</button>
+    <button class="button primary" data-dialog-open="upload-files">Subir archivos</button>
+  </div>{% endif %}
+</div>
+
+<section class="toolbar">
+  <form method="get" class="search">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar en esta carpeta…">
+    <button class="button ghost" type="submit">Buscar</button>
+  </form>
+  <span class="muted">{{ folders|length }} carpeta(s) · {{ files|length }} archivo(s){% if unit %} · {{ used_bytes|filesize }} de {{ unit.quota_bytes|filesize }}{% endif %}</span>
+</section>
+
+<section class="file-panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nombre</th><th>Propietario</th><th>Modificado</th><th>Tamaño</th><th>Compartido</th><th></th></tr></thead>
+      <tbody>
+      {% for folder in folders %}
+        <tr>
+          <td>
+            <a class="item-name" href="{{ url_for('drive.browse', folder_id=folder.id) }}"><span class="icon folder">▰</span>{{ folder.name }}</a>
+          </td>
+          <td>{{ folder.created_by.username }}</td>
+          <td>{{ folder.updated_at|datetime_local }}</td>
+          <td>—</td><td>—</td>
+          <td class="actions">
+            {% if folder.parent_id is not none %}
+            <details class="menu">
+              <summary>•••</summary>
+              <div>
+                <form method="post" action="{{ url_for('drive.rename_folder', folder_id=folder.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input name="name" value="{{ folder.name }}" required>
+                  <button type="submit">Renombrar</button>
+                </form>
+                <form method="post" action="{{ url_for('drive.delete_folder', folder_id=folder.id) }}" data-confirm="Se eliminará la carpeta y todo su contenido. ¿Continuar?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="danger-text" type="submit">Eliminar carpeta</button>
+                </form>
+              </div>
+            </details>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      {% for file in files %}
+        <tr>
+          <td>
+            <a class="item-name" href="{{ url_for('drive.download_file', file_id=file.id) }}"><span class="icon file">▤</span>{{ file.display_name }}</a>
+            <small class="hash" title="SHA-256">{{ file.sha256[:12] if file.sha256 else '' }}</small>
+          </td>
+          <td>{{ file.uploaded_by.username }}</td>
+          <td>{{ file.updated_at|datetime_local }}</td>
+          <td>{{ file.size_bytes|filesize }}</td>
+          <td><span class="badge {{ 'active' if file.share_links|selectattr('is_active')|list else '' }}">{{ file.share_links|selectattr('is_active')|list|length }} enlace(s)</span></td>
+          <td class="actions">
+            <details class="menu">
+              <summary>•••</summary>
+              <div class="menu-card">
+                <a href="{{ url_for('drive.download_file', file_id=file.id) }}">Descargar</a>
+                <button type="button" data-dialog-open="share-{{ file.id }}">Crear enlace</button>
+                <form method="post" action="{{ url_for('drive.rename_file', file_id=file.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input name="name" value="{{ file.display_name }}" required>
+                  <button type="submit">Renombrar</button>
+                </form>
+                {% for share in file.share_links if share.is_active %}
+                <form method="post" action="{{ url_for('drive.revoke_share', share_id=share.id) }}" data-confirm="¿Revocar este enlace?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit">Revocar enlace #{{ share.id }} ({{ share.download_count }} desc.)</button>
+                </form>
+                {% endfor %}
+                <form method="post" action="{{ url_for('drive.delete_file', file_id=file.id) }}" data-confirm="El archivo se eliminará de forma permanente. ¿Continuar?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="danger-text" type="submit">Eliminar archivo</button>
+                </form>
+              </div>
+            </details>
+          </td>
+        </tr>
+        <dialog id="share-{{ file.id }}">
+          <form method="post" action="{{ url_for('drive.create_share', file_id=file.id) }}" class="dialog-card">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="dialog-heading"><div><p class="eyebrow">Compartir archivo</p><h2>{{ file.display_name }}</h2></div><button type="button" class="dialog-close">×</button></div>
+            <label>Destino o referencia (opcional)<input name="label" placeholder="Tribunal de Cuentas"></label>
+            <div class="form-grid">
+              <label>Vigencia
+                <select name="days">
+                  <option value="1">1 día</option><option value="7" selected>7 días</option>
+                  <option value="30">30 días</option><option value="">Sin vencimiento</option>
+                </select>
+              </label>
+              <label>Máximo de descargas<input type="number" min="1" name="max_downloads" placeholder="Sin límite"></label>
+            </div>
+            <label>Contraseña adicional (opcional)<input type="password" name="password" minlength="8" autocomplete="new-password"></label>
+            <p class="muted small">El enlace solo se mostrará una vez. Podrás revocarlo en cualquier momento.</p>
+            <button class="button primary" type="submit">Generar enlace seguro</button>
+          </form>
+        </dialog>
+      {% endfor %}
+      {% if not folders and not files %}
+        <tr><td colspan="6"><div class="empty"><span>↥</span><h3>Esta carpeta está vacía</h3><p>Subí archivos o creá una carpeta para comenzar.</p></div></td></tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<dialog id="new-folder">
+  <form method="post" action="{{ url_for('drive.create_folder') }}" class="dialog-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="parent_id" value="{{ current_folder.id if current_folder else '' }}">
+    <div class="dialog-heading"><h2>Nueva carpeta</h2><button type="button" class="dialog-close">×</button></div>
+    <label>Nombre<input name="name" required maxlength="255" autofocus></label>
+    <button class="button primary" type="submit">Crear carpeta</button>
+  </form>
+</dialog>
+
+<dialog id="upload-files">
+  <form method="post" action="{{ url_for('drive.upload') }}" enctype="multipart/form-data" class="dialog-card upload-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="folder_id" value="{{ current_folder.id if current_folder else '' }}">
+    <div class="dialog-heading"><h2>Subir archivos</h2><button type="button" class="dialog-close">×</button></div>
+    <label class="dropzone">Seleccioná uno o varios archivos
+      <input type="file" name="files" multiple required>
+      <span>Los archivos grandes se envían por streaming hacia MinIO.</span>
+    </label>
+    <div class="upload-progress" hidden><div></div><span>Subiendo… 0%</span></div>
+    <button class="button primary" type="submit">Comenzar carga</button>
+  </form>
+</dialog>
+{% endblock %}

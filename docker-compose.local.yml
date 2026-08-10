@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    env_file: .env
+    ports: ["5000:5000"]
+    depends_on:
+      mariadb: {condition: service_healthy}
+      redis: {condition: service_started}
+      minio: {condition: service_started}
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: lavalleja_drive
+      MARIADB_USER: drive
+      MARIADB_PASSWORD: drive-local
+      MARIADB_ROOT_PASSWORD: root-local
+    volumes: [mariadb_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:8-alpine
+    command: redis-server --appendonly yes
+    volumes: [redis_data:/data]
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-local
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [minio_data:/data]
+volumes:
+  mariadb_data:
+  redis_data:
+  minio_data:

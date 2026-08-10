@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Usuarios · Drive Institucional{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Superadministración</p><h1>Usuarios</h1><p class="muted">Administrá el acceso al repositorio.</p></div><button class="button primary" data-dialog-open="new-user">Crear usuario</button></div>
+<section class="file-panel"><div class="table-wrap"><table>
+  <thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Unidad</th><th>Estado</th><th>Último ingreso</th><th></th></tr></thead>
+  <tbody>
+  {% for user in users %}
+  <tr>
+    <td><strong>{{ user.username }}</strong></td><td>{{ user.email }}</td>
+    <td><span class="badge active">{{ user.role }}</span></td><td>{{ user.unit.name if user.unit else '—' }}</td>
+    <td><span class="badge {{ 'active' if user.is_active }}">{{ 'Activo' if user.is_active else 'Desactivado' }}</span></td>
+    <td>{{ user.last_login_at|datetime_local }}</td>
+    <td class="actions">
+      <button class="button tiny ghost" data-dialog-open="user-{{ user.id }}">Editar</button>
+      <dialog id="user-{{ user.id }}">
+        <form method="post" action="{{ url_for('users.update', user_id=user.id) }}" class="dialog-card" data-user-form>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="dialog-heading"><h2>Editar {{ user.username }}</h2><button type="button" class="dialog-close">×</button></div>
+            <label>Rol<select name="role" data-role-select><option value="admin" {{ 'selected' if user.role == 'admin' }}>Admin</option><option value="superadmin" {{ 'selected' if user.role == 'superadmin' }}>Superadmin</option></select></label>
+            <label data-unit-field {% if user.is_superadmin %}hidden{% endif %}>Unidad asignada<select name="unit_id" data-unit-select {% if user.is_superadmin %}disabled{% else %}required{% endif %}><option value="">Seleccionar unidad</option>{% for unit in units %}<option value="{{ unit.id }}" {{ 'selected' if user.unit_id == unit.id }}>{{ unit.name }}</option>{% endfor %}</select></label>
+          <label class="checkbox"><input type="checkbox" name="is_active" {{ 'checked' if user.is_active }}> Usuario activo</label>
+          <label>Nueva contraseña (opcional)<input type="password" name="password" minlength="12" autocomplete="new-password"></label>
+          <button class="button primary" type="submit">Guardar cambios</button>
+        </form>
+      </dialog>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div></section>
+
+<dialog id="new-user">
+  <form method="post" action="{{ url_for('users.create') }}" class="dialog-card" data-user-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="dialog-heading"><h2>Nuevo usuario</h2><button type="button" class="dialog-close">×</button></div>
+    <label>Nombre de usuario<input name="username" minlength="3" required></label>
+    <label>Correo institucional<input type="email" name="email" required></label>
+    <label>Contraseña temporal<input type="password" name="password" minlength="12" required autocomplete="new-password"></label>
+      <label>Rol<select name="role" data-role-select><option value="admin">Admin</option><option value="superadmin">Superadmin</option></select></label>
+      <label data-unit-field>Unidad asignada<select name="unit_id" data-unit-select required><option value="">Seleccionar unidad</option>{% for unit in units %}<option value="{{ unit.id }}">{{ unit.name }}</option>{% endfor %}</select></label>
+    <button class="button primary" type="submit">Crear usuario</button>
+  </form>
+</dialog>
+{% endblock %}

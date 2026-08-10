@@ -1,0 +1,38 @@
+from app.extensions import db
+from app.models import AuditLog, TwoFactorCode
+
+from .conftest import login
+
+
+def test_login_requires_second_factor(client, app):
+    response = client.post(
+        "/admin/login", data={"email": "admin@lavalleja.uy", "password": "Contraseña-segura-123"}
+    )
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/admin/2fa")
+    with client.session_transaction() as session:
+        assert session["pending_2fa_user_id"]
+
+
+def test_valid_2fa_logs_user_in(client, app):
+    response = login(client, app)
+    assert "Dirección de Hacienda" in response.text
+    with app.app_context():
+        assert AuditLog.query.filter_by(action="LOGIN").count() == 1
+        challenge = TwoFactorCode.query.order_by(TwoFactorCode.id.desc()).first()
+        assert challenge.consumed_at is not None
+
+
+def test_code_cannot_be_reused(client, app):
+    client.post("/admin/login", data={"email": "admin@lavalleja.uy", "password": "Contraseña-segura-123"})
+    code = app.extensions["outbox"][-1]["code"]
+    assert client.post("/admin/2fa", data={"code": code}).status_code == 302
+    client.post("/admin/logout")
+    with app.app_context():
+        challenge = TwoFactorCode.query.order_by(TwoFactorCode.id.desc()).first()
+        assert challenge.verify(code) is False
+
+
+def test_bad_password_does_not_reveal_user(client):
+    response = client.post("/admin/login", data={"email": "admin@lavalleja.uy", "password": "bad"})
+    assert "Correo o contraseña incorrectos" in response.text

@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+.venv
+venv
+sample-backend
+__pycache__
+**/__pycache__
+**/.env
+**/.env.*
+*.py[cod]
+.pytest_cache
+.coverage
+htmlcov
+tests
+docs
+*.zip

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="result-card">
+  <div class="success-mark">✓</div>
+  <p class="eyebrow">Enlace seguro creado</p>
+  <h1>{{ item.display_name }}</h1>
+  <p class="muted">Copialo ahora: por seguridad el token completo no se guarda y no volverá a mostrarse.</p>
+  <div class="copy-field">
+    <input id="share-url" value="{{ public_url }}" readonly>
+    <button class="button primary" type="button" data-copy="#share-url">Copiar</button>
+  </div>
+  <dl class="summary">
+    <div><dt>Vence</dt><dd>{{ link.expires_at|datetime_local if link.expires_at else 'Sin vencimiento' }}</dd></div>
+    <div><dt>Descargas</dt><dd>{{ link.max_downloads or 'Sin límite' }}</dd></div>
+    <div><dt>Contraseña</dt><dd>{{ 'Sí' if link.password_hash else 'No' }}</dd></div>
+  </dl>
+  <a class="button secondary" href="{{ url_for('drive.browse', folder_id=item.folder_id) if item.folder_id else url_for('drive.index') }}">Volver a archivos</a>
+</section>
+{% endblock %}
