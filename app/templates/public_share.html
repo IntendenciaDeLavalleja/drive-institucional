@@ -3,7 +3,7 @@
 {% block main_class %}public-shell{% endblock %}
 {% block content %}
 <section class="public-card">
-  <img src="{{ url_for('static', filename='logo.webp') }}" alt="Gobierno de Lavalleja" class="public-logo">
+  <img src="{{ url_for('public_asset', filename='Logo.webp') }}" alt="Gobierno de Lavalleja" class="public-logo">
   <p class="eyebrow">Archivo compartido institucionalmente</p>
   <h1>{{ link.file.display_name }}</h1>
   <p class="muted">{{ link.file.size_bytes|filesize }} · Publicado el {{ link.file.created_at|datetime_local }}</p>

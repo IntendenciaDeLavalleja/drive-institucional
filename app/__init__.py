@@ -1,7 +1,8 @@
 import os
 import uuid
+from pathlib import Path
 
-from flask import Flask, g, redirect, request, url_for
+from flask import Flask, g, redirect, request, send_from_directory, url_for
 from flask_login import current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -14,6 +15,12 @@ from .storage import storage
 def create_app(config_name=None, overrides=None):
     name = config_name or os.getenv("FLASK_CONFIG", "default")
     app = Flask(__name__)
+    public_dir = Path(app.root_path).parent / "public"
+
+    @app.get("/public/<path:filename>")
+    def public_asset(filename):
+        return send_from_directory(public_dir, filename)
+
     app.config.from_object(CONFIGS[name])
     if overrides:
         app.config.update(overrides)
