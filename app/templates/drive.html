@@ -98,10 +98,10 @@
             </details>
           </td>
         </tr>
-        <dialog id="share-{{ file.id }}" class="share-dialog">
+        <dialog id="share-{{ file.id }}" class="share-dialog" data-modal-version="spacious" aria-labelledby="share-title-{{ file.id }}">
           <form method="post" action="{{ url_for('drive.create_share', file_id=file.id) }}" class="dialog-card share-dialog-card">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="dialog-heading"><div><p class="eyebrow">Compartir archivo</p><h2 class="share-file-title" title="{{ file.display_name }}">{{ file.display_name }}</h2></div><button type="button" class="dialog-close" aria-label="Cerrar">×</button></div>
+            <div class="dialog-heading"><div><p class="eyebrow">Compartir archivo</p><h2 id="share-title-{{ file.id }}" class="share-file-title" title="{{ file.display_name }}">{{ file.display_name }}</h2></div><button type="button" class="dialog-close" aria-label="Cerrar">×</button></div>
             <label>Destino o referencia (opcional)<input name="label" placeholder="Tribunal de Cuentas"></label>
             <div class="share-retention"><strong>Vencimiento fijo: {{ retention_days }} días desde la carga</strong><span>El enlace se desactiva cuando el archivo se elimina automáticamente.</span></div>
             <label>Máximo de descargas (opcional)<input type="number" min="1" name="max_downloads" placeholder="Sin límite"></label>
