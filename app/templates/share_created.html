@@ -3,7 +3,7 @@
 <section class="result-card">
   <div class="success-mark">✓</div>
   <p class="eyebrow">Enlace seguro creado</p>
-  <h1>{{ item.display_name }}</h1>
+  <h1 class="share-created-title" title="{{ item.display_name }}">{{ item.display_name }}</h1>
   <p class="muted">Copialo ahora: por seguridad el token completo no se guarda y no volverá a mostrarse.</p>
   <div class="copy-field">
     <input id="share-url" value="{{ public_url }}" readonly>

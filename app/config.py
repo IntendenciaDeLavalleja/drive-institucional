@@ -11,6 +11,15 @@ def env_bool(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def public_base_url() -> str:
+    """Use Coolify's public host for externally shared links."""
+    return (
+        os.getenv("FLASK_RUN_HOST")
+        or os.getenv("PUBLIC_BASE_URL")
+        or f"http://localhost:{os.getenv('FLASK_RUN_PORT', '5000')}"
+    ).rstrip("/")
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
     WTF_CSRF_SECRET_KEY = os.getenv("WTF_CSRF_SECRET_KEY") or SECRET_KEY
@@ -50,7 +59,7 @@ class Config:
     FILE_RETENTION_DAYS = int(os.getenv("FILE_RETENTION_DAYS", "15"))
     CAPTCHA_ENABLED = env_bool("CAPTCHA_ENABLED", True)
     APP_NAME = os.getenv("APP_NAME", "Drive Institucional de Lavalleja")
-    PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:5000").rstrip("/")
+    PUBLIC_BASE_URL = public_base_url()
     TRUSTED_PROXY_COUNT = int(os.getenv("TRUSTED_PROXY_COUNT", "1"))
 
 

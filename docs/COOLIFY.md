@@ -19,7 +19,7 @@ Puntos importantes:
 - `MINIO_ENDPOINT` no lleva `http://` ni ruta.
 - `MINIO_SECURE=false` suele corresponder al tráfico interno de Docker; usar `true` si el endpoint interno tiene TLS.
 - `MINIO_BUCKET=lavalleja-drive` concede un espacio lógico propio a la aplicación.
-- `PUBLIC_BASE_URL` debe ser el dominio HTTPS final.
+- `FLASK_RUN_HOST` debe ser el dominio HTTPS público final y se usa para generar enlaces compartidos. `PUBLIC_BASE_URL` sólo se usa como fallback compatible.
 - `DATABASE_URL` debe usar `mariadb+mariadbconnector://`.
 - `REDIS_URL` debe contener contraseña si el Redis la exige.
 - generar `SECRET_KEY` y `WTF_CSRF_SECRET_KEY` diferentes con un generador criptográfico.
