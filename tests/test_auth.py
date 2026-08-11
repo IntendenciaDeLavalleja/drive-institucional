@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models import AuditLog, TwoFactorCode
+from app.models import AuditLog, TwoFactorCode, User
 
 from .conftest import login
 
@@ -36,3 +36,18 @@ def test_code_cannot_be_reused(client, app):
 def test_bad_password_does_not_reveal_user(client):
     response = client.post("/admin/login", data={"email": "admin@lavalleja.uy", "password": "bad"})
     assert "Correo o contraseña incorrectos" in response.text
+
+
+def test_user_can_optionally_update_own_profile(logged_client, app):
+    response = logged_client.post(
+        "/admin/profile",
+        data={"username": "admin-actualizado", "email": "", "password": "Nueva-clave-segura-123"},
+        follow_redirects=True,
+    )
+
+    assert "Perfil actualizado" in response.text
+    with app.app_context():
+        user = User.query.filter_by(email="admin@lavalleja.uy").one()
+        assert user.username == "admin-actualizado"
+        assert user.check_password("Nueva-clave-segura-123")
+        assert AuditLog.query.filter_by(action="PROFILE_UPDATE").count() == 1

@@ -74,6 +74,19 @@ def storage_used_bytes(unit_id):
     )
 
 
+def build_folder_tree(unit_id=None):
+    query = Folder.query.filter_by(deleted_at=None)
+    if unit_id:
+        query = query.filter_by(unit_id=unit_id)
+    nodes = query.order_by(Folder.name.asc()).all()
+    children = {}
+    for node in nodes:
+        children.setdefault(node.parent_id, []).append(node)
+    for node in nodes:
+        node.tree_children = children.get(node.id, [])
+    return children.get(None, [])
+
+
 def stream_object(item, disposition="attachment"):
     try:
         stat = storage.stat(item.object_key)
@@ -172,6 +185,7 @@ def browse(folder_id):
         used_bytes=storage_used_bytes(folder.unit_id) if folder else None,
         can_manage_content=folder is not None,
         retention_days=current_app.config["FILE_RETENTION_DAYS"],
+        folder_tree=build_folder_tree(folder.unit_id if folder else getattr(unit, "id", None)),
     )
 
 

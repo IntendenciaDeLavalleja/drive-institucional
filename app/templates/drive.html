@@ -1,15 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
+{% macro render_folder_tree(nodes) %}
+<ul class="folder-tree-list">
+  {% for node in nodes %}
+  <li>
+    <a class="folder-tree-link {{ 'is-current' if current_folder and node.id == current_folder.id }}" href="{{ url_for('drive.browse', folder_id=node.id) }}">
+      <svg class="folder-tree-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A2.5 2.5 0 0 1 6 4h4l2 2h6a2.5 2.5 0 0 1 2.5 2.5v8A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+      <span>{{ node.name }}</span>
+    </a>
+    {% if node.tree_children %}{{ render_folder_tree(node.tree_children) }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
 <div class="page-heading">
   <div>
     <p class="eyebrow">Repositorio institucional privado{% if unit %} · {{ unit.name }}{% endif %}</p>
     <h1>{{ current_folder.name if current_folder else 'Todos los archivos' }}</h1>
-    <div class="breadcrumbs">
-      <a href="{{ url_for('drive.index') }}">Inicio</a>
+    <nav class="breadcrumbs" aria-label="Ruta de carpetas">
+      <a class="crumb" href="{{ url_for('drive.index') }}"><span class="folder-icon home" aria-hidden="true">⌂</span>Inicio</a>
       {% for crumb in breadcrumbs %}
-        <span>›</span><a href="{{ url_for('drive.browse', folder_id=crumb.id) }}">{{ crumb.name }}</a>
+        <span class="crumb-separator" aria-hidden="true">›</span>
+        <a class="crumb" href="{{ url_for('drive.browse', folder_id=crumb.id) }}"><span class="folder-icon" aria-hidden="true">▰</span>{{ crumb.name }}</a>
       {% endfor %}
-    </div>
+    </nav>
   </div>
   {% if can_manage_content %}<div class="heading-actions">
     <button class="button secondary" data-dialog-open="new-folder">Nueva carpeta</button>
@@ -22,6 +36,15 @@
   Los archivos se eliminan automáticamente luego de 15 días. Este Drive es exclusivamente para compartir documentación institucional dentro de la Intendencia o con organismos externos; no puede utilizarse para fines privados.
 </aside>
 
+<div class="drive-workspace">
+  {% if folder_tree %}
+  <aside class="folder-tree-panel" aria-label="Árbol de carpetas">
+    <div class="folder-tree-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A2.5 2.5 0 0 1 6 4h4l2 2h6a2.5 2.5 0 0 1 2.5 2.5v8A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"/></svg><span>Carpetas</span></div>
+    {% if current_folder and current_folder.parent %}<a class="folder-tree-back" href="{{ url_for('drive.browse', folder_id=current_folder.parent.id) }}">← Volver a {{ current_folder.parent.name }}</a>{% endif %}
+    {{ render_folder_tree(folder_tree) }}
+  </aside>
+  {% endif %}
+  <div class="drive-browser">
 <section class="toolbar">
   <form method="get" class="search">
     <input type="search" name="q" value="{{ q }}" placeholder="Buscar en esta carpeta…">
@@ -35,10 +58,15 @@
     <table>
       <thead><tr><th>Nombre</th><th>Propietario</th><th>Modificado</th><th>Tamaño</th><th>Compartido</th><th></th></tr></thead>
       <tbody>
+      {% if current_folder and current_folder.parent %}
+        <tr class="parent-folder-row">
+          <td colspan="6"><a class="item-name" href="{{ url_for('drive.browse', folder_id=current_folder.parent.id) }}"><span class="folder-icon back" aria-hidden="true">↩</span><span>Volver a {{ current_folder.parent.name }}</span></a></td>
+        </tr>
+      {% endif %}
       {% for folder in folders %}
         <tr>
           <td>
-            <a class="item-name" href="{{ url_for('drive.browse', folder_id=folder.id) }}"><span class="icon folder">▰</span>{{ folder.name }}</a>
+            <a class="item-name" href="{{ url_for('drive.browse', folder_id=folder.id) }}"><span class="folder-icon" aria-hidden="true">▰</span>{{ folder.name }}</a>
           </td>
           <td>{{ folder.created_by.username }}</td>
           <td>{{ folder.updated_at|datetime_local }}</td>
@@ -106,6 +134,8 @@
     </table>
   </div>
 </section>
+  </div>
+</div>
 
 {% for file in files %}
   {% include "components/share_modal.html" %}

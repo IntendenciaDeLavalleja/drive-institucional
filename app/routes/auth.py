@@ -122,6 +122,51 @@ def admin_dashboard():
     return redirect(url_for("drive.index"))
 
 
+@bp.route("/admin/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        changes = {}
+
+        if username:
+            if len(username) < 3:
+                flash("El nombre debe tener al menos 3 caracteres.", "error")
+                return render_template("profile.html")
+            changes["username"] = username
+        if email:
+            if "@" not in email:
+                flash("Ingresá un correo válido.", "error")
+                return render_template("profile.html")
+            changes["email"] = email
+        if password and len(password) < 12:
+            flash("La nueva contraseña debe tener al menos 12 caracteres.", "error")
+            return render_template("profile.html")
+        if not changes and not password:
+            flash("No hay cambios para guardar.", "info")
+            return redirect(url_for("auth.profile"))
+
+        duplicate = User.query.filter(
+            User.id != current_user.id,
+            (User.username == changes.get("username", current_user.username))
+            | (User.email == changes.get("email", current_user.email)),
+        ).first()
+        if duplicate:
+            flash("El nombre o correo ya está en uso.", "error")
+            return render_template("profile.html")
+        current_user.username = changes.get("username", current_user.username)
+        current_user.email = changes.get("email", current_user.email)
+        if password:
+            current_user.set_password(password)
+        audit("PROFILE_UPDATE", "Datos personales actualizados")
+        db.session.commit()
+        flash("Perfil actualizado.", "success")
+        return redirect(url_for("auth.profile"))
+    return render_template("profile.html")
+
+
 @bp.post("/admin/logout")
 def logout():
     if current_user.is_authenticated:

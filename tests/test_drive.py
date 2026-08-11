@@ -59,3 +59,19 @@ def test_folder_delete_removes_nested_objects(logged_client, app):
     with app.app_context():
         assert DriveFile.query.one().deleted_at is not None
         assert all(folder.deleted_at for folder in Folder.query.filter(Folder.parent_id.is_not(None)).all())
+
+
+def test_folder_tree_exposes_internal_navigation(logged_client, app):
+    logged_client.post("/drive/folders", data={"name": "Padre"})
+    with app.app_context():
+        parent_id = Folder.query.filter_by(name="Padre").one().id
+    logged_client.post("/drive/folders", data={"name": "Hija", "parent_id": parent_id})
+    with app.app_context():
+        child_id = Folder.query.filter_by(name="Hija").one().id
+
+    response = logged_client.get(f"/drive/folder/{child_id}")
+
+    assert 'class="folder-tree-panel"' in response.text
+    assert "Padre" in response.text
+    assert "Hija" in response.text
+    assert 'folder-tree-link is-current' in response.text

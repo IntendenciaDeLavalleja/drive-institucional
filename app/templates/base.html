@@ -23,13 +23,14 @@
     </a>
     <nav>
       <a href="{{ url_for('drive.index') }}">Archivos</a>
+      <a href="{{ url_for('auth.profile') }}">Mi perfil</a>
        {% if current_user.is_superadmin %}
         <a href="{{ url_for('units.index') }}">Unidades</a>
         <a href="{{ url_for('users.index') }}">Usuarios</a>
        <a href="{{ url_for('drive.expiration_panel') }}">Vencimientos</a>
        <a href="{{ url_for('drive.audit_logs') }}">Auditoría</a>
       {% endif %}
-      <span class="user-chip">{{ current_user.username }} · {{ 'Superadmin' if current_user.is_superadmin else 'Admin' }}</span>
+      <a class="user-chip" href="{{ url_for('auth.profile') }}" title="Editar mi perfil">{{ current_user.username }} · {{ 'Superadmin' if current_user.is_superadmin else 'Admin' }}</a>
       <form method="post" action="{{ url_for('auth.logout') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="button ghost" type="submit">Salir</button>
