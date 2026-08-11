@@ -51,3 +51,9 @@ def test_user_can_optionally_update_own_profile(logged_client, app):
         assert user.username == "admin-actualizado"
         assert user.check_password("Nueva-clave-segura-123")
         assert AuditLog.query.filter_by(action="PROFILE_UPDATE").count() == 1
+
+
+def test_profile_form_uses_isolated_spacious_layout(logged_client):
+    response = logged_client.get("/admin/profile")
+
+    assert 'class="file-panel profile-form" data-profile-version="spacious"' in response.text

@@ -5,7 +5,7 @@
   <div class="page-heading">
     <div><p class="eyebrow">Cuenta personal</p><h1>Mi perfil</h1><p class="muted">Actualizá tus datos de acceso. Cada campo es opcional.</p></div>
   </div>
-  <form method="post" class="file-panel profile-form">
+  <form method="post" class="file-panel profile-form" data-profile-version="spacious">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Nombre de usuario<input name="username" value="{{ current_user.username }}" minlength="3" autocomplete="username"></label>
     <label>Correo institucional<input type="email" name="email" value="{{ current_user.email }}" autocomplete="email"></label>
